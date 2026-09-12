@@ -50,12 +50,13 @@ This repository publishes the extension core derived from upstream; our propriet
   - [x] Rule subscription/sharing
   - [x] Custom terminology
 - [x] Custom shortcuts
-  - `Alt+Q` Translate
-  - `Alt+C` Toggle Style
-  - `Alt+K` Open Setting Popup
-  - `Alt+S` Open Translate Popup / Translate Selected Text
-  - `Alt+O` Open Options Page
-  - `Alt+I` Input Box Translation
+  - `Alt+Q` Toggle page translation
+  - `Alt+K` Open/close the extension popup
+  - `Alt+S` Open the translation box
+  - `Alt+D` Open the separate translation window
+  - `Alt+C` Toggle translation style
+  - `Alt+O` Open the options page
+  - More shortcuts can be customized on the browser's extension shortcuts page and in settings
 
 ## Install
 
