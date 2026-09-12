@@ -26,7 +26,7 @@ This repository publishes the extension core derived from upstream; our propriet
   - [x] Input box translation
     - Instantly translate text in the input box via shortcut
   - [x] Selection translation
-    - [x] Open the translation box on any page and compare translations across services
+    - [x] Open the translation box on any page and switch between multiple translation services
     - [x] English dictionary
     - [x] Favorite words
   - [x] Mouse hover translation
@@ -47,7 +47,7 @@ This repository publishes the extension core derived from upstream; our propriet
 - [x] Cross-device data sync
   - [x] Cloud sync of favorites, wordbook and translation history with your account
 - [x] Custom translation rules
-  - [x] Rule subscription/sharing
+  - [x] Rule subscription
   - [x] Custom terminology
 - [x] Custom shortcuts
   - `Alt+Q` Toggle page translation
@@ -90,11 +90,7 @@ Common reasons for API test failures include:
 - Incorrect address:
   - For example, `Ollama` has a native API address and an `Openai`-compatible address. This plugin currently supports the `Openai`-compatible address and does not support the `Ollama` native API address.
 - Some AI models do not support batch translation:
-  - In this case, you can choose to disable batch translation or use a custom API.
-  - Alternatively, you can use a custom API. For details, please refer to: [Custom API Example Documentation](custom-api_v2.md)
-- Some AI models have inconsistent parameters:
-  - For example, the parameters of the `Gemini` native API are highly inconsistent. Some model versions do not support certain parameters, leading to errors.
-  - In this case, you can modify the request body using a `Hook`, or replace it with `Gemini2` (an OpenAI-compatible address).
+  - In this case, you can adapt the model individually via a custom API (Hook). For details, please refer to: [Custom API Example Documentation](custom-api_v2.md)
 - The server restricts cross-origin access, returning a 403 error:
   - For example, `Ollama` requires adding the environment variable `OLLAMA_ORIGINS=*` when starting.
 
@@ -111,7 +107,6 @@ Example reference: [custom-api_v2.md](custom-api_v2.md)
 - [x] **Aggregated text sending**: Optimize request strategy to reduce API calls and improve performance.
 - [x] **Enhanced rich-text translation**: Accurate translation of complex page structures and rich text.
 - [x] **Enhanced custom/AI interfaces**: Advanced AI features such as streaming transmission.
-- [x] **English dictionary backup mechanism**: When a translation service fails, switch to another dictionary or fall back to local dictionary queries.
 - [ ] **Rule co-building mechanism upgrade**: More flexible rule sharing, version management and community review.
 
  If you are interested in any of these, feel free to discuss in [Issues](https://github.com/xiaochenstarboys/paralleltext/issues) or submit a PR!
@@ -121,8 +116,8 @@ Example reference: [custom-api_v2.md](custom-api_v2.md)
 ```sh
 git clone https://github.com/xiaochenstarboys/paralleltext.git
 cd paralleltext
-pnpm install
-pnpm build
+pnpm install       # requires pnpm 9 (see .pnpm-version)
+pnpm build:chrome  # build the Chrome extension; use pnpm build:firefox for Firefox
 ```
 
 ### External Trigger Example
