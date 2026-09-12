@@ -1,0 +1,509 @@
+import { useCallback, useEffect, useState } from "react";
+import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import EditIcon from "@mui/icons-material/Edit";
+import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
+import MenuItem from "@mui/material/MenuItem";
+import Link from "@mui/material/Link";
+import { useSetting } from "../../hooks/Setting";
+import { useI18n } from "../../hooks/I18n";
+import { useAlert } from "../../hooks/Alert";
+import { isAutoTranslateClipboardSupported, isExt } from "../../libs/client";
+import { browser } from "../../libs/browser";
+import {
+  CLIPBOARD_READ_PERMISSION,
+  hasClipboardReadPermission,
+  requestClipboardReadPermission,
+} from "../../libs/clipboard";
+import Grid from "@mui/material/Grid";
+
+import {
+  UI_LANGS,
+  CACHE_NAME,
+  OPT_SHORTCUT_TRANSLATE,
+  OPT_SHORTCUT_TRANSONLY,
+  OPT_SHORTCUT_STYLE,
+  OPT_SHORTCUT_POPUP,
+  OPT_SHORTCUT_SETTING,
+  DEFAULT_BLACKLIST,
+  MSG_CONTEXT_MENUS,
+  OPT_LANGS_TO_REVERSED as OPT_LANGS_TO,
+} from "../../config";
+import { useShortcut } from "../../hooks/Shortcut";
+import ShortcutInput from "./ShortcutInput";
+import { useFab } from "../../hooks/Fab";
+import { sendBgMsg } from "../../libs/msg";
+import { kissLog } from "../../libs/log";
+import UploadButton from "./UploadButton";
+import DownloadButton from "./DownloadButton";
+
+   
+                 
+   
+function ShortcutItem({ action, label }) {
+  const { shortcut, setShortcut } = useShortcut(action);
+  return (
+    <ShortcutInput value={shortcut} onChange={setShortcut} label={label} />
+  );
+}
+
+   
+                               
+   
+export function ExtCommands() {
+  const [commands, setCommands] = useState([]);
+  const i18n = useI18n();
+  const alert = useAlert();
+
+  useEffect(() => {
+    if (browser?.commands?.getAll) {
+      browser.commands
+        .getAll()
+        .then((cmds) => {
+          if (cmds) {
+            setCommands(cmds.filter((c) => c.description));
+          }
+        })
+        .catch((err) => {
+          console.error("fetch commands error:", err);
+        });
+    }
+  }, []);
+
+  if (!commands || commands.length === 0) return null;
+
+  const handleEdit = () => {
+    let url = "chrome://extensions/shortcuts";
+    const ua = navigator.userAgent;
+    if (ua.includes("Firefox/")) {
+      alert.info(i18n("firefox_shortcut_edit_hint"));
+      return;
+    }
+    if (ua.includes("Edg/")) {
+      url = "edge://extensions/shortcuts";
+    } else if (ua.includes("OPR/")) {
+      url = "opera://extensions/shortcuts";
+    } else if (ua.includes("Brave/")) {
+      url = "brave://extensions/shortcuts";
+    }
+
+    if (browser?.tabs?.create) {
+      browser.tabs.create({ url });
+    } else {
+      window.open(url, "_blank");
+    }
+  };
+
+  return (
+    <Box>
+      <Grid container spacing={2} columns={12}>
+        {commands.map((cmd) => (
+          <Grid item xs={12} sm={12} md={6} lg={3} key={cmd.name}>
+            <Stack direction="row" alignItems="flex-start">
+              <TextField
+                size="small"
+                label={cmd.description}
+                value={cmd.shortcut || ""}
+                fullWidth
+                disabled
+              />
+              <IconButton onClick={handleEdit}>
+                <EditIcon />
+              </IconButton>
+            </Stack>
+          </Grid>
+        ))}
+      </Grid>
+    </Box>
+  );
+}
+
+export function AutoTranslateClipboardSetting({ value, onChange }) {
+  const i18n = useI18n();
+  const alert = useAlert();
+  const [hasPermission, setHasPermission] = useState(null);
+
+  const refreshPermission = useCallback(async () => {
+    setHasPermission(await hasClipboardReadPermission());
+  }, []);
+
+  useEffect(() => {
+    refreshPermission();
+
+    const handlePermissionChange = (permissions) => {
+      if (permissions?.permissions?.includes(CLIPBOARD_READ_PERMISSION)) {
+        refreshPermission();
+      }
+    };
+    browser?.permissions?.onAdded?.addListener?.(handlePermissionChange);
+    browser?.permissions?.onRemoved?.addListener?.(handlePermissionChange);
+
+    return () => {
+      browser?.permissions?.onAdded?.removeListener?.(handlePermissionChange);
+      browser?.permissions?.onRemoved?.removeListener?.(handlePermissionChange);
+    };
+  }, [refreshPermission]);
+
+  const enableAutoTranslate = async () => {
+    const granted = await requestClipboardReadPermission();
+    setHasPermission(granted);
+    if (granted) {
+      onChange(true);
+      alert.success(i18n("clipboard_permission_granted"));
+    } else {
+      onChange(false);
+      alert.warning(i18n("clipboard_permission_denied"));
+    }
+  };
+
+  const handleChange = async (event) => {
+    if (event.target.value) {
+      await enableAutoTranslate();
+    } else {
+      onChange(false);
+    }
+  };
+
+  return (
+    <Grid item xs={12} sm={12} md={6} lg={3}>
+      <TextField
+        select
+        fullWidth
+        size="small"
+        name="autoTranslateClipboard"
+        value={value}
+        label={i18n("auto_translate_clipboard")}
+        onChange={handleChange}
+        helperText={
+          value && hasPermission === false ? (
+            <Link
+              component="button"
+              type="button"
+              onClick={enableAutoTranslate}
+            >
+              {i18n("clipboard_permission_required")}
+            </Link>
+          ) : (
+            i18n("auto_translate_clipboard_helper")
+          )
+        }
+      >
+        <MenuItem value={true}>{i18n("enable")}</MenuItem>
+        <MenuItem value={false}>{i18n("disable")}</MenuItem>
+      </TextField>
+    </Grid>
+  );
+}
+
+   
+                           
+   
+export default function Settings() {
+  const i18n = useI18n();
+            
+  const { setting, updateSetting } = useSetting();
+  const alert = useAlert();
+                       
+  const { fab, updateFab } = useFab();
+
+                 
+  const handleChange = (e) => {
+    e.preventDefault();
+    let { name, value } = e.target;
+
+                                                      
+    switch (name) {
+      case "contextMenuType":
+        isExt && sendBgMsg(MSG_CONTEXT_MENUS, value);
+        break;
+      default:
+    }
+    updateSetting({
+      [name]: value,
+    });
+  };
+
+                 
+  const handleClearCache = () => {
+    try {
+      caches.delete(CACHE_NAME);
+      alert.success(i18n("clear_success"));
+    } catch (err) {
+      kissLog("clear cache", err);
+    }
+  };
+
+                   
+  const handleImport = async (data) => {
+    try {
+      updateSetting(JSON.parse(data));
+    } catch (err) {
+      kissLog("import setting", err);
+    }
+  };
+
+                 
+  const {
+    uiLang,
+    clearCache,
+    contextMenuType = 1,
+    touchModes = [2],
+    blacklist = DEFAULT_BLACKLIST.join(",\n"),
+    skipLangs = [],
+    translateVariants = true,
+    autoTranslateClipboard = false,
+  } = setting;
+                               
+  const {
+    isHide = false,
+    fabClickAction = 0,
+    hideExceptionList = "",
+  } = fab || {};
+
+  return (
+    <Box>
+      <Stack spacing={3}>
+        {               }
+        <Stack
+          direction="row"
+          alignItems="center"
+          spacing={2}
+          useFlexGap
+          flexWrap="wrap"
+        >
+          <UploadButton text={i18n("import")} handleImport={handleImport} />
+          <DownloadButton
+            handleData={() => JSON.stringify(setting, null, 2)}
+            text={i18n("export")}
+            fileName={`kiss-setting_v2_${Date.now()}.json`}
+          />
+        </Stack>
+
+        {               }
+        <Box>
+          <Grid container spacing={2} columns={12}>
+            {                }
+            <Grid item xs={12} sm={12} md={6} lg={3}>
+              <TextField
+                select
+                fullWidth
+                size="small"
+                name="uiLang"
+                value={uiLang}
+                label={i18n("ui_lang")}
+                onChange={handleChange}
+              >
+                {UI_LANGS.map(([lang, name]) => (
+                  <MenuItem key={lang} value={lang}>
+                    {name}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
+            {isAutoTranslateClipboardSupported && (
+              <AutoTranslateClipboardSetting
+                value={autoTranslateClipboard}
+                onChange={(value) =>
+                  updateSetting({ autoTranslateClipboard: value })
+                }
+              />
+            )}
+            {                                     }
+            <Grid item xs={12} sm={12} md={6} lg={3}>
+              <TextField
+                select
+                fullWidth
+                size="small"
+                name="fabClickAction"
+                value={fabClickAction}
+                label={i18n("fab_click_action")}
+                onChange={(e) => updateFab({ fabClickAction: e.target.value })}
+              >
+                <MenuItem value={0}>{i18n("fab_click_menu")}</MenuItem>
+                <MenuItem value={1}>{i18n("fab_click_translate")}</MenuItem>
+              </TextField>
+            </Grid>
+            {                            }
+            <Grid item xs={12} sm={12} md={6} lg={3}>
+              <TextField
+                select
+                fullWidth
+                size="small"
+                name="touchModes"
+                value={touchModes}
+                label={i18n("touch_translate_shortcut")}
+                onChange={handleChange}
+                SelectProps={{
+                  multiple: true,
+                }}
+              >
+                {[0, 2, 3, 4, 5, 6, 7].map((item) => (
+                  <MenuItem key={item} value={item}>
+                    {i18n(`touch_tap_${item}`)}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
+            {                     }
+            <Grid item xs={12} sm={12} md={6} lg={3}>
+              <TextField
+                select
+                fullWidth
+                size="small"
+                name="contextMenuType"
+                value={contextMenuType}
+                label={i18n("context_menus")}
+                onChange={handleChange}
+              >
+                <MenuItem value={0}>{i18n("hide_context_menus")}</MenuItem>
+                <MenuItem value={1}>{i18n("simple_context_menus")}</MenuItem>
+                <MenuItem value={2}>{i18n("secondary_context_menus")}</MenuItem>
+              </TextField>
+            </Grid>
+            {                               }
+            <Grid item xs={12} sm={12} md={6} lg={3}>
+              <TextField
+                select
+                fullWidth
+                size="small"
+                name="translateVariants"
+                value={translateVariants}
+                label={i18n("translate_variants")}
+                helperText={i18n("translate_variants_helper")}
+                onChange={handleChange}
+              >
+                <MenuItem value={true}>{i18n("enable")}</MenuItem>
+                <MenuItem value={false}>{i18n("disable")}</MenuItem>
+              </TextField>
+            </Grid>
+          </Grid>
+        </Box>
+
+        {                               }
+        <TextField
+          select
+          size="small"
+          label={i18n("skip_langs")}
+          helperText={i18n("skip_langs_helper")}
+          name="skipLangs"
+          value={skipLangs}
+          onChange={handleChange}
+          SelectProps={{
+            multiple: true,
+          }}
+        >
+          {OPT_LANGS_TO.map(([langKey, langName]) => (
+            <MenuItem key={langKey} value={langKey}>
+              {langName}
+            </MenuItem>
+          ))}
+        </TextField>
+
+        {                              }
+        <TextField
+          select
+          fullWidth
+          size="small"
+          name="isHide"
+          value={isHide}
+          label={i18n("hide_fab_button")}
+          onChange={(e) => {
+            updateFab({ isHide: e.target.value });
+          }}
+        >
+          <MenuItem value={false}>{i18n("show")}</MenuItem>
+          <MenuItem value={true}>{i18n("hide")}</MenuItem>
+        </TextField>
+
+        <TextField
+          fullWidth
+          size="small"
+          multiline
+          maxRows={10}
+          name="hideExceptionList"
+          value={hideExceptionList}
+          label={i18n("fab_exception_list")}
+          helperText={i18n("fab_exception_list_helper")}
+          onChange={(e) => updateFab({ hideExceptionList: e.target.value })}
+        />
+
+        {                             }
+        <TextField
+          size="small"
+          label={i18n("translate_blacklist")}
+          helperText={i18n("pattern_helper")}
+          name="blacklist"
+          value={blacklist}
+          onChange={handleChange}
+          maxRows={10}
+          multiline
+        />
+
+        {                                      }
+        {isExt ? (
+          <>
+            {                                }
+            <TextField
+              select
+              fullWidth
+              size="small"
+              name="clearCache"
+              value={clearCache}
+              label={i18n("if_clear_cache")}
+              onChange={handleChange}
+              helperText={
+                <Link component="button" onClick={handleClearCache}>
+                  {i18n("clear_all_cache_now")}
+                </Link>
+              }
+            >
+              <MenuItem value={false}>{i18n("clear_cache_never")}</MenuItem>
+              <MenuItem value={true}>{i18n("clear_cache_restart")}</MenuItem>
+            </TextField>
+
+            <ExtCommands />
+          </>
+        ) : (
+                                     
+          <>
+            <Box>
+              <Grid container spacing={2} columns={12}>
+                <Grid item xs={12} sm={12} md={6} lg={3}>
+                  <ShortcutItem
+                    action={OPT_SHORTCUT_TRANSLATE}
+                    label={i18n("toggle_translate_shortcut")}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={12} md={6} lg={3}>
+                  <ShortcutItem
+                    action={OPT_SHORTCUT_TRANSONLY}
+                    label={i18n("toggle_transonly_shortcut")}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={12} md={6} lg={3}>
+                  <ShortcutItem
+                    action={OPT_SHORTCUT_STYLE}
+                    label={i18n("toggle_style_shortcut")}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={12} md={6} lg={3}>
+                  <ShortcutItem
+                    action={OPT_SHORTCUT_POPUP}
+                    label={i18n("toggle_popup_shortcut")}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={12} md={6} lg={3}>
+                  <ShortcutItem
+                    action={OPT_SHORTCUT_SETTING}
+                    label={i18n("open_setting_shortcut")}
+                  />
+                </Grid>
+              </Grid>
+            </Box>
+          </>
+        )}
+      </Stack>
+    </Box>
+  );
+}

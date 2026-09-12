@@ -1,0 +1,32 @@
+{
+  "app_name": {
+    "message": "ParallelText"
+  },
+  "app_description": {
+    "message": "외국어로 읽는 모든 경험을 계속 활용할 수 있는 지식으로"
+  },
+  "translate_selection": {
+    "message": "\"%s\" 번역"
+  },
+  "toggle_translate": {
+    "message": "번역 켜기"
+  },
+  "toggle_translate_only": {
+    "message": "번역만 표시"
+  },
+  "toggle_style": {
+    "message": "스타일 전환"
+  },
+  "open_options": {
+    "message": "설정 열기"
+  },
+  "open_tranbox": {
+    "message": "팝업 열기"
+  },
+  "open_separate_window": {
+    "message": "독립 창으로 열기"
+  },
+  "toggle_tranbox": {
+    "message": "번역 상자 전환"
+  }
+}

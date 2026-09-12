@@ -1,0 +1,32 @@
+{
+  "app_name": {
+    "message": "ParallelText"
+  },
+  "app_description": {
+    "message": "外国語で読むたびに、繰り返し活かせる知識を積み重ねる"
+  },
+  "translate_selection": {
+    "message": "「%s」を翻訳"
+  },
+  "toggle_translate": {
+    "message": "翻訳の切り替え"
+  },
+  "toggle_translate_only": {
+    "message": "訳文のみ表示"
+  },
+  "toggle_style": {
+    "message": "スタイル切り替え"
+  },
+  "open_options": {
+    "message": "設定を開く"
+  },
+  "open_tranbox": {
+    "message": "ポップアップを開く"
+  },
+  "open_separate_window": {
+    "message": "独立ウィンドウで開く"
+  },
+  "toggle_tranbox": {
+    "message": "翻訳ボックスを切り替え"
+  }
+}

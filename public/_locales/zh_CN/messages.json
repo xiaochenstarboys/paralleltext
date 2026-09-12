@@ -1,0 +1,32 @@
+{
+  "app_name": {
+    "message": "平行悦读"
+  },
+  "app_description": {
+    "message": "让每一次外文阅读，都成为可以继续使用的积累"
+  },
+  "translate_selection": {
+    "message": "翻译 \"%s\""
+  },
+  "toggle_translate": {
+    "message": "开启翻译"
+  },
+  "toggle_translate_only": {
+    "message": "仅看译文"
+  },
+  "toggle_style": {
+    "message": "切换样式"
+  },
+  "open_options": {
+    "message": "打开设置"
+  },
+  "open_tranbox": {
+    "message": "打开页内弹窗"
+  },
+  "open_separate_window": {
+    "message": "打开独立窗口"
+  },
+  "toggle_tranbox": {
+    "message": "开启划词翻译"
+  }
+}
