@@ -4,9 +4,6 @@
 
 一个简约、开源的双语对照翻译扩展。
 
-
-[kiss-translator.webm](https://github.com/fishjar/kiss-translator/assets/1157624/f7ba8a5c-e4a8-4d5a-823a-5c5c67a0a47f)
-
 ## 开源许可与出处
 
 本项目基于 [kiss-translator](https://github.com/fishjar/kiss-translator)（作者 [fishjar](https://github.com/fishjar)）二次开发，依照上游许可证以 [GNU General Public License v3.0](LICENSE) 开源，许可证全文见仓库根目录 `LICENSE` 文件。感谢原作者的开源工作。
@@ -20,13 +17,9 @@
 - [x] 适配常见浏览器
   - [x] Chrome/Edge
   - [x] Firefox
-  - [x] Kiwi (Android)
-  - [x] Orion (iOS)
-  - [x] Safari
-  - [x] Thunderbird
 - [x] 支持多种翻译服务
-  - [x] Google/DeepL
-  - [x] DeepSeek/OpenAI/Gemini/Claude
+  - [x] Google
+  - [x] DeepSeek/千问/OpenAI
   - [x] 自定义接口
 - [x] 覆盖常见翻译场景
   - [x] 网页双语对照翻译
@@ -37,15 +30,11 @@
     - [x] 英文词典翻译
     - [x] 收藏词汇
   - [x] 鼠标悬停翻译
-  - [x] YouTube 字幕翻译
-    - 支持任意翻译服务对视频字幕进行翻译并双语显示
-    - 内置基础的字幕合并与断句算法，提升翻译效果
-    - 支持AI断句功能，可进一步提升翻译质量
-    - 自定义字幕样式
 - [x] 支持多样翻译效果
   - [x] 支持自动识别文本与手动规则两种模式
     - 自动识别文本模式使得绝大部分网站无需编写规则也能翻译完整
     - 手动规则模式，可以针对特定网站极致优化
+  - [x] 多彩分句阅读，原文与译文同色对照
   - [x] 自定义译文样式
   - [x] 支持富文本翻译及显示，能够尽量保留原文中的链接及其他文本样式
   - [x] 支持仅显示译文（隐藏原文）
@@ -53,12 +42,10 @@
   - [x] 通过自定义接口，理论上支持任何翻译接口
   - [x] 聚合批量发送翻译文本
   - [x] 支持流式传输，实时显示翻译结果
-  - [x] 支持AI上下文会话记忆功能，提升翻译效果
   - [x] 自定义AI术语词典
   - [x] 所有接口均支持Hook和自定义参数等高级功能
-- [x] 跨客户端数据同步
-  - [x] KISS-Worker（cloudflare/docker）
-  - [x] WebDAV
+- [x] 跨设备数据同步
+  - [x] 登录账号云端同步收藏、生词本与翻译历史
 - [x] 自定义翻译规则
   - [x] 规则订阅/规则分享
   - [x] 自定义专业术语
@@ -72,26 +59,13 @@
 
 ## 安装
 
-- [x] 浏览器扩展
-  - [x] Chrome [安装地址](https://chrome.google.com/webstore/detail/kiss-translator/bdiifdefkgmcblbcghdlonllpjhhjgof?hl=zh-CN)
-    - [x] Kiwi (Android)
-    - [x] Orion (iOS)
-  - [x] Edge [安装地址](https://microsoftedge.microsoft.com/addons/detail/%E7%AE%80%E7%BA%A6%E7%BF%BB%E8%AF%91/jemckldkclkinpjighnoilpbldbdmmlh?hl=zh-CN)
-  - [x] Firefox [安装地址](https://addons.mozilla.org/zh-CN/firefox/addon/kiss-translator/)
-  - [ ] Safari
-    - [ ] Safari (Mac)
-    - [ ] Safari (iOS) 
-  - [x] Thunderbird [下载地址](https://github.com/fishjar/kiss-translator/releases)
+- 官网下载安装：[https://www.braintiktok.com](https://www.braintiktok.com)
+- Chrome / Edge / Firefox 扩展商店陆续上架中
 
 ## 关联项目
 
-- 数据同步服务: [https://github.com/fishjar/kiss-worker](https://github.com/fishjar/kiss-worker)
-  - 可用于本项目的数据同步服务。
-  - 亦可用于分享个人的私有规则列表。
-  - 自己部署，自己管理，数据私有。
 - 社区订阅规则: [https://github.com/fishjar/kiss-rules](https://github.com/fishjar/kiss-rules)
-  - 提供社区维护的，最新最全的订阅规则列表。
-  - 求助规则相关的问题。
+  - 社区维护的订阅规则列表（本项目沿用其公开数据源，规则格式兼容）。
 
 ## 常见问题
 
@@ -116,18 +90,18 @@
   - 比如 `Ollama` 有原生接口地址和 `Openai` 兼容的地址，本插件目前统一支持 `Openai` 兼容的地址，不支持 `Ollama` 原生接口地址
 - 某些AI模型不支持聚合翻译：
   - 此种情况可以选择禁用聚合翻译或通过自定义接口的方式来使用。
-  - 或通过自定义接口的方式来使用，详情参考： [自定义接口示例文档](https://github.com/fishjar/kiss-translator/blob/master/custom-api_v2.md)
+  - 或通过自定义接口的方式来使用，详情参考： [自定义接口示例文档](custom-api_v2.md)
 - 某些AI模型的参数不一致：
   - 比如 `Gemini` 原生接口参数非常不一致，部分版本的模型不支持某些参数会导致返回错误。
   - 此种情况可以通过 `Hook` 修改请求 `body` ,或者更换为 `Gemini2` (`Openai` 兼容的地址)
 - 服务器跨域限制访问，返回403错误：
-  - 比如 `Ollama` 启动时须添加环境变量 `OLLAMA_ORIGINS=*`, 参考：https://github.com/fishjar/kiss-translator/issues/174
+  - 比如 `Ollama` 启动时须添加环境变量 `OLLAMA_ORIGINS=*`
 
 ### 如何设置自定义接口的hook函数
 
 自定义接口功能非常强大、灵活，理论可以接入任何翻译接口。
 
-示例参考： [custom-api_v2.md](https://github.com/fishjar/kiss-translator/blob/master/custom-api_v2.md)
+示例参考： [custom-api_v2.md](custom-api_v2.md)
 
 ## 未来规划 
 
@@ -135,19 +109,17 @@
 
 - [x] **聚合发送文本**：优化请求策略，减少翻译接口调用次数，提升性能。
 - [x] **增强富文本翻译**：支持更复杂的页面结构和富文本内容的准确翻译。
-- [x] **强化自定义/AI 接口**：支持流式传输、上下文记忆、多轮对话等高级 AI 功能。
+- [x] **强化自定义/AI 接口**：支持流式传输等高级 AI 功能。
 - [x] **英文词典备灾机制**：当翻译服务失效时，可切换其他词典或 fallback 到本地词典查询。
-- [x] **优化 YouTube 字幕支持**：改进流式字幕的合并与翻译体验，减少断句。
 - [ ] **规则共建机制升级**：引入更灵活的规则分享、版本管理与社区评审流程。
- 
- 如果你对某个方向感兴趣，欢迎在 [Issues](https://github.com/fishjar/kiss-translator/issues) 中讨论或提交 PR！
+
+ 如果你对某个方向感兴趣，欢迎在本仓库 [Issues](https://github.com/xiaochenstarboys/paralleltext/issues) 中讨论或提交 PR！
 
 ## 开发指引
 
 ```sh
-git clone https://github.com/fishjar/kiss-translator.git
-cd kiss-translator
-git checkout dev # 提交PR建议推送到dev分支
+git clone https://github.com/xiaochenstarboys/paralleltext.git
+cd paralleltext
 pnpm install
 pnpm build
 ```
